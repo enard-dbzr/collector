@@ -24,14 +24,16 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("org.springframework.boot:spring-boot-starter-validation")
-//    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-//    implementation("org.springframework.boot:spring-boot-starter-liquibase")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
 
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 
     implementation("com.github.pengrad:java-telegram-bot-api:9.6.0")
+
+    implementation("org.casbin:casdoor-spring-boot-starter:1.15.0")
 
 
     runtimeOnly("org.postgresql:postgresql")

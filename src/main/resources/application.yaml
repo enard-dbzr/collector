@@ -22,9 +22,20 @@ spring:
     change-log: classpath:db/changelog/master.xml
     enabled: true
 
+casdoor:
+  endpoint: https://auth.hsfg.ru
+  client-id: 18981169b72dedf02531
+  client-secret: 968e263167a7848b6d6c12c420e0a31ec1e22fb2
+#  certificate: <jwt-public-key>
+  organization-name: hsfg
+  application-name: hsfg-tg_bot
+
 app:
   telegram:
     url: https://api.telegram.org/bot
     token: ${APP_TELEGRAM_TOKEN}
     update-listener-sleep: 1s
     debug: false
+
+  chat-authentication:
+    callback: http://localhost:9000/callback
