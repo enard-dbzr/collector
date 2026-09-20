@@ -3,8 +3,8 @@ spring:
     name: collector
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/bot
-    username: bot
+    url: ${BOT_DB_URL}
+    username: ${BOT_DB_USERNAME}
     password: ${BOT_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -23,12 +23,12 @@ spring:
     enabled: true
 
 casdoor:
-  endpoint: https://auth.hsfg.ru
-  client-id: 18981169b72dedf02531
-  client-secret: 968e263167a7848b6d6c12c420e0a31ec1e22fb2
-#  certificate: <jwt-public-key>
-  organization-name: hsfg
-  application-name: hsfg-tg_bot
+  endpoint: ${CASDOOR_ENDPOINT}
+  client-id: ${CASDOOR_CLIENT_ID}
+  client-secret: ${CASDOOR_CLIENT_SECRET}
+  certificate: ${CASDOOR_CERTIFICATE}
+  organization-name: ${CASDOOR_ORGANIZATION_NAME}
+  application-name: ${CASDOOR_APPLICATION_NAME}
 
 app:
   telegram:
@@ -38,4 +38,4 @@ app:
     debug: false
 
   chat-authentication:
-    callback: http://localhost:9000/callback
+    callback: ${APP_CHAT_AUTHENTICATION_CALLBACK}

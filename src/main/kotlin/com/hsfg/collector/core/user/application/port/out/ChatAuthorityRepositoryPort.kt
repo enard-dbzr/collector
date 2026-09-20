@@ -8,4 +8,6 @@ interface ChatAuthorityRepositoryPort {
     fun save(authority: ChatAuthority)
 
     fun get(chatId: ChatId): ChatAuthority?
+
+    fun getByAuthState(authState: String): ChatAuthority?
 }

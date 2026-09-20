@@ -19,4 +19,8 @@ class DbChatAuthorityRepository(
     override fun get(chatId: ChatId): ChatAuthority? {
         return jpaRepository.findById(chatId.value).orElse(null)?.toDomain()
     }
+
+    override fun getByAuthState(authState: String): ChatAuthority? {
+        return jpaRepository.getByState(authState)?.toDomain()
+    }
 }

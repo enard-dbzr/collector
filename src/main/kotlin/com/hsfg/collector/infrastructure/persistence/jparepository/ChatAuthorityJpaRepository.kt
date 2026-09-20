@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ChatAuthorityJpaRepository : JpaRepository<ChatAuthorityEntity, String> {
 
+    fun getByState(authState: String): ChatAuthorityEntity?
 }
