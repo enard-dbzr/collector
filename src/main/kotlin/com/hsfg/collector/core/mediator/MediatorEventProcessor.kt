@@ -1,6 +1,5 @@
 package com.hsfg.collector.core.mediator
 
-import com.hsfg.collector.core.interaction.application.dto.incoming.IncomingEvent
 import com.hsfg.collector.core.interaction.application.port.out.IncomingEventProcessor
 import com.hsfg.collector.core.interaction.application.service.InteractionDeliveryService
 import com.hsfg.collector.core.interaction.domain.ChatId
@@ -11,19 +10,20 @@ import org.springframework.stereotype.Service
 @Service
 class MediatorEventProcessor(
     private val workflowStorage: WorkflowStorageService,
-    private val deliveryService: InteractionDeliveryService
+    private val deliveryService: InteractionDeliveryService,
+    private val rootFrameFactory: RootFrame.RootFrameFactory,
 ) : IncomingEventProcessor {
 
     override fun process(
         chatId: ChatId,
-        event: IncomingEvent
+        event: BotEvent
     ) {
 
-        val root = workflowStorage.load(chatId.value, RootFrame::class) ?: RootFrame()
+        val root = workflowStorage.load(chatId.value, RootFrame::class) ?: rootFrameFactory.createNew()
 
         val context = BotContext(deliveryService, chatId)
 
-        root.handle(context, BotEvent.ChatHandled(event))
+        root.handle(context, event)
 
         workflowStorage.store(chatId.value, root)
     }

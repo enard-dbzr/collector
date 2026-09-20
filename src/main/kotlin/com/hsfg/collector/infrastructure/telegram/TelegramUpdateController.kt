@@ -5,6 +5,7 @@ import com.hsfg.collector.core.interaction.application.service.InteractionHandle
 import com.hsfg.collector.core.interaction.domain.ChatId
 import com.hsfg.collector.core.interaction.domain.MessageId
 import com.hsfg.collector.core.interaction.domain.content.MessageBody
+import com.hsfg.collector.core.mediator.BotEvent
 import com.pengrad.telegrambot.UpdatesListener
 import com.pengrad.telegrambot.model.Update
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -43,7 +44,10 @@ class TelegramUpdateController(
                 replyTo = update.message().replyToMessage()?.messageId()?.let { MessageId(it.toString()) }
             )
 
-            handlerService.handle(chatId, IncomingEvent.MessageReceived(messageId, messageBody))
+            handlerService.handle(
+                chatId,
+                BotEvent.ChatHandled(IncomingEvent.MessageReceived(messageId, messageBody))
+            )
 
         } else if (update.callbackQuery() != null) {
             val chatId = ChatId(update.callbackQuery().from().id().toString())
@@ -55,7 +59,10 @@ class TelegramUpdateController(
 
             val tag = update.callbackQuery().data()
 
-            handlerService.handle(chatId, IncomingEvent.ButtonClicked(sourceMessageId, tag))
+            handlerService.handle(
+                chatId,
+                BotEvent.ChatHandled(IncomingEvent.ButtonClicked(sourceMessageId, tag))
+            )
         }
     }
 }

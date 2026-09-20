@@ -6,4 +6,6 @@ import com.hsfg.collector.core.workflow.domain.frame.FrameEvent
 sealed interface BotEvent : FrameEvent {
 
     data class ChatHandled(val event: IncomingEvent) : BotEvent
+
+    class Authorized : BotEvent
 }
