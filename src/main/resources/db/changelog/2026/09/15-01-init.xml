@@ -16,7 +16,7 @@
             <column name="state" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="token" type="VARCHAR(255)"/>
+            <column name="token" type="TEXT"/>
         </createTable>
     </changeSet>
     <changeSet id="1789413325674-3" author="enard">
