@@ -12,14 +12,9 @@ import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
 import com.hsfg.collector.core.workflow.domain.objectpool.ObjectPool
 import com.hsfg.collector.core.workflow.domain.objectpool.PoolId
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 class AuthFrame private constructor(
     private val chatAuthenticationService: ChatAuthenticationService,
@@ -45,8 +40,7 @@ class AuthFrame private constructor(
         if (event !is BotEvent.Authorized)
             return FrameResult.Continue(null)
 
-        val sentMessageId = sentMessageId ?: error("AuthFrame: sentMessageId is null, but event is Authorized")
-
+        val sentMessageId = sentMessageId ?: error("Sent message id is null")
         context.deliveryService.editMessage(
             sentMessageId,
             EditMessageBody(text = "Вы успешно авторизовались", attachments = listOf())
@@ -80,5 +74,7 @@ class AuthFrame private constructor(
             }
             return null
         }
+
+        fun createNew() = AuthFrame(chatAuthenticationService)
     }
 }

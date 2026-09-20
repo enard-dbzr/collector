@@ -6,7 +6,7 @@ import com.hsfg.collector.core.mediator.frame.AskFrame
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.RootFrame
 import com.hsfg.collector.core.mediator.frame.SendMessageFrame
-import com.hsfg.collector.core.mediator.frame.StartWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.workflow.application.DefaultDataFactoryRegistry
 import com.hsfg.collector.core.workflow.application.frame.sequence.SequenceFrame
 import org.springframework.context.annotation.Bean
@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class DataFactoryConfig(
     private val rootFrameFactory: RootFrame.RootFrameFactory,
-    private val authFrameFactory: AuthFrame.AuthFrameFactory
+    private val authFrameFactory: AuthFrame.AuthFrameFactory,
+    private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory
 ) {
     @Bean
     fun defaultDataFactoryRegistry(): DefaultDataFactoryRegistry {
@@ -27,7 +28,7 @@ class DataFactoryConfig(
         registry.register("frame.utils.ask.message", AskFrame::class, AskFrame.AskFrameFactory())
         registry.register("frame.utils.auth", AuthFrame::class, authFrameFactory)
 
-        registry.register("frame.workflow.start", StartWorkflow::class, StartWorkflow.StartWorkflowFactory())
+        registry.register("frame.workflow.start", StartWorkflow::class, startWorkflowFactory)
 
 
         registry.register("data.utils.message_id", MessageId::class, MessageIdFactory())

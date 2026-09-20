@@ -4,6 +4,7 @@ import com.hsfg.collector.core.interaction.application.dto.incoming.IncomingEven
 import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
+import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
@@ -16,8 +17,9 @@ import java.util.*
 
 class RootFrame(
     private var currentState: Frame<BotContext, BotEvent, *>? = null,
-    private var interceptorFrame: AuthFrame? = null,
-    private val interceptorFrameFactory: AuthFrame.AuthFrameFactory,
+    private var interceptorFrame: Frame<BotContext, BotEvent, *>? = null,
+    private val authFrameFactory: AuthFrame.AuthFrameFactory,
+    private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
 ) : Frame<BotContext, BotEvent, Nothing?> {
 
     override fun onEnter(context: BotContext): FrameResult<Nothing?> {
@@ -39,10 +41,9 @@ class RootFrame(
         }
 
         if (event is BotEvent.ChatHandled && event.event is IncomingEvent.MessageReceived) {
+            @Suppress("ControlFlowWithEmptyBody")
             when (event.event.body.text) {
-                "/start" -> {
-                    changeState(context, StartWorkflow())
-                }
+
             }
         }
 
@@ -63,6 +64,24 @@ class RootFrame(
     }
 
     private fun interceptAttempt(context: BotContext, event: BotEvent): Boolean {
+        if (
+            event is BotEvent.ChatHandled &&
+            event.event is IncomingEvent.MessageReceived &&
+            event.event.body.text == "/start" &&
+            interceptorFrame == null
+        ) {
+            interceptorFrame = startWorkflowFactory.createNew()
+
+            val frameResult = interceptorFrame?.onEnter(context)
+            if (frameResult is FrameResult.Finished) {
+                interceptorFrame!!.onExit(context)
+                interceptorFrame = null
+            }
+
+            return interceptorFrame != null
+
+        }
+
         if (interceptorFrame != null) {
             val handleResult = interceptorFrame!!.handle(context, event)
 
@@ -74,7 +93,7 @@ class RootFrame(
             return true
         }
 
-        interceptorFrame = interceptorFrameFactory.createIfNeeded(context, event)
+        interceptorFrame = authFrameFactory.createIfNeeded(context, event)
         val frameResult = interceptorFrame?.onEnter(context)
         if (frameResult is FrameResult.Finished) {
             interceptorFrame!!.onExit(context)
@@ -88,6 +107,7 @@ class RootFrame(
     @Component
     class RootFrameFactory(
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
+        private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     ) : DataFactory<RootFrame> {
 
         override fun serialize(objectPool: ObjectPool, instance: RootFrame): JsonElement {
@@ -104,12 +124,15 @@ class RootFrame(
             } as Frame<BotContext, BotEvent, *>?
 
             val interceptorFrame = data.jsonObject["interceptorFrame"]?.jsonPrimitive?.contentOrNull?.let {
-                objectPool.getData(PoolId(UUID.fromString(it)), AuthFrame::class)
-            }
+                objectPool.getData(PoolId(UUID.fromString(it)), Frame::class)
+            } as Frame<BotContext, BotEvent, *>?
 
-            return RootFrame(currentState, interceptorFrame, authFrameFactory)
+            return RootFrame(currentState, interceptorFrame, authFrameFactory, startWorkflowFactory)
         }
 
-        fun createNew() = RootFrame(interceptorFrameFactory = authFrameFactory)
+        fun createNew() = RootFrame(
+            authFrameFactory = authFrameFactory,
+            startWorkflowFactory = startWorkflowFactory
+        )
     }
 }
