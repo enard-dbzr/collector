@@ -67,9 +67,10 @@ class RootFrame(
         if (
             event is BotEvent.ChatHandled &&
             event.event is IncomingEvent.MessageReceived &&
-            event.event.body.text == "/start" &&
-            interceptorFrame == null
+            event.event.body.text == "/start"
         ) {
+            interceptorFrame?.onExit(context)
+
             interceptorFrame = startWorkflowFactory.createNew()
 
             val frameResult = interceptorFrame?.onEnter(context)

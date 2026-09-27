@@ -43,10 +43,19 @@ class AuthFrame private constructor(
         val sentMessageId = sentMessageId ?: error("Sent message id is null")
         context.deliveryService.editMessage(
             sentMessageId,
-            EditMessageBody(text = "Вы успешно авторизовались", attachments = listOf())
+            EditMessageBody(text = "Вы успешно авторизовались")
         )
 
         return FrameResult.Finished(null)
+    }
+
+    override fun onExit(context: BotContext) {
+        sentMessageId?.let {
+            context.deliveryService.editMessage(
+                it,
+                EditMessageBody(attachments = listOf())
+            )
+        }
     }
 
     @Component

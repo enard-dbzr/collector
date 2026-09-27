@@ -52,7 +52,8 @@ class TelegramInteractionSender(
             r
         } else {
             val r = EditMessageReplyMarkup(messageId.chatId(), messageId.messageId())
-            body.attachments?.let { a -> r.replyMarkup(buildInlineKeyboard(a)) }
+            val attachments = body.attachments ?: error("No attachments provided")
+            r.replyMarkup(buildInlineKeyboard(attachments))
             r
         }
 
