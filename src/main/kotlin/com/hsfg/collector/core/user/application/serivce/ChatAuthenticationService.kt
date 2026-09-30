@@ -5,6 +5,7 @@ import com.hsfg.collector.core.user.application.event.ChatAuthorizedEvent
 import com.hsfg.collector.core.user.application.config.ChatAuthenticationProperties
 import com.hsfg.collector.core.user.application.port.out.ChatAuthorityRepositoryPort
 import com.hsfg.collector.core.user.domain.ChatAuthority
+import org.casbin.casdoor.exception.AuthException
 import org.casbin.casdoor.service.AuthService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -38,6 +39,8 @@ class ChatAuthenticationService(
 
         val token = casdoorAuthService.getOAuthToken(code, authState)
 
+        casdoorAuthService.parseJwtToken(token)
+
         authority.token = token
 
         authorityRepositoryPort.save(authority)
@@ -46,6 +49,15 @@ class ChatAuthenticationService(
 
     fun isAuthenticated(chatId: ChatId): Boolean {
         val authority = authorityRepositoryPort.get(chatId)
-        return authority?.token != null
+
+        authority?.token ?: return false
+
+        try {
+            casdoorAuthService.parseJwtToken(authority.token)
+        } catch (_: AuthException) {
+            return false
+        }
+
+        return true
     }
 }

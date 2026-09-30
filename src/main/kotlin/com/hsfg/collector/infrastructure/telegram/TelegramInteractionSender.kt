@@ -23,6 +23,10 @@ class TelegramInteractionSender(
     private val bot: TelegramBot
 ) : InteractionSenderPort {
 
+    companion object {
+        const val IS_NOT_MODIFIED_DESCRIPTION = "message is not modified"
+    }
+
     override fun sendMessage(chatId: ChatId, body: MessageBody): MessageId {
         val request = SendMessage(chatId.value.toLong(), body.text)
             .parseMode(ParseMode.Markdown)
@@ -60,6 +64,10 @@ class TelegramInteractionSender(
         val response = bot.execute(request)
 
         if (!response.isOk) {
+            if (response.description().contains(IS_NOT_MODIFIED_DESCRIPTION)) {
+                return
+            }
+
             throw RuntimeException("Failed to edit message: ${response.description()}")
         }
     }

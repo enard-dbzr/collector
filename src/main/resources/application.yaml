@@ -26,7 +26,7 @@ casdoor:
   endpoint: ${CASDOOR_ENDPOINT}
   client-id: ${CASDOOR_CLIENT_ID}
   client-secret: ${CASDOOR_CLIENT_SECRET}
-  certificate: ${CASDOOR_CERTIFICATE}
+  certificate: file:${CASDOOR_CERTIFICATE_LOCATION:/etc/app/casdoor_cert.pem}
   organization-name: ${CASDOOR_ORGANIZATION_NAME}
   application-name: ${CASDOOR_APPLICATION_NAME}
 
