@@ -1,10 +1,12 @@
 package com.hsfg.collector.core.user.application.serivce
 
 import com.hsfg.collector.core.interaction.domain.ChatId
-import com.hsfg.collector.core.user.application.event.ChatAuthorizedEvent
 import com.hsfg.collector.core.user.application.config.ChatAuthenticationProperties
+import com.hsfg.collector.core.user.application.event.ChatAuthorizedEvent
+import com.hsfg.collector.core.user.application.exception.ChatUnauthorizedException
 import com.hsfg.collector.core.user.application.port.out.ChatAuthorityRepositoryPort
 import com.hsfg.collector.core.user.domain.ChatAuthority
+import com.hsfg.collector.core.user.domain.UserId
 import org.casbin.casdoor.exception.AuthException
 import org.casbin.casdoor.service.AuthService
 import org.springframework.context.ApplicationEventPublisher
@@ -25,7 +27,6 @@ class ChatAuthenticationService(
         val authority = ChatAuthority(
             chatId = chatId,
             authState = Uuid.generateV7().toString(),
-            token = null
         )
 
         authorityRepositoryPort.save(authority)
@@ -33,15 +34,18 @@ class ChatAuthenticationService(
         return casdoorAuthService.getSigninUrl(properties.callback, authority.authState)
     }
 
+    /**
+     * @throws ChatUnauthorizedException if the token is invalid
+     */
     fun login(authState: String, code: String) {
         val authority = authorityRepositoryPort.getByAuthState(authState)
             ?: error("Can not find user with authState $authState")
 
         val token = casdoorAuthService.getOAuthToken(code, authState)
-
-        casdoorAuthService.parseJwtToken(token)
+        val user = parseToken(authority.chatId, token)
 
         authority.token = token
+        authority.userId = UserId(user.id)
 
         authorityRepositoryPort.save(authority)
         eventPublisher.publishEvent(ChatAuthorizedEvent(authority.chatId))
@@ -59,5 +63,11 @@ class ChatAuthenticationService(
         }
 
         return true
+    }
+
+    private fun parseToken(chatId: ChatId, token: String) = try {
+        casdoorAuthService.parseJwtToken(token)
+    } catch (_: AuthException) {
+        throw ChatUnauthorizedException(chatId)
     }
 }

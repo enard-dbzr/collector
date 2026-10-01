@@ -6,5 +6,6 @@
 
     <include file="db/changelog/2026/09/15-01-init.xml"/>
     <include file="db/changelog/2026/09/30-01-add_workflow_snapshots.xml"/>
+    <include file="db/changelog/2026/10/01-01-chat_authorities-add_user_id.xml"/>
 
 </databaseChangeLog>
