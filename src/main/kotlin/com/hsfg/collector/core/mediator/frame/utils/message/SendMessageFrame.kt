@@ -1,4 +1,4 @@
-package com.hsfg.collector.core.mediator.frame
+package com.hsfg.collector.core.mediator.frame.utils.message
 
 import com.hsfg.collector.core.interaction.domain.MessageId
 import com.hsfg.collector.core.interaction.domain.content.MessageBody
