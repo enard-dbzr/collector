@@ -82,10 +82,4 @@ class TelegramInteractionSender(
 
         return markup
     }
-
-    private fun MessageId.chatId() = this.value.split(":")[0].toLong()
-
-    private fun MessageId.messageId() = this.value.split(":")[1].toInt()
-
-    private fun composeMessageId(chatId: Long, messageId: Int) = MessageId("$chatId:$messageId")
 }

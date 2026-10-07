@@ -38,10 +38,17 @@ class TelegramUpdateController(
 
             val messageId = MessageId(update.message().messageId().toString())
 
+            val replyTo = update.message().replyToMessage()?.messageId()?.let {
+                composeMessageId(
+                    update.message().chat().id(),
+                    it
+                )
+            }
+
             val messageBody = MessageBody(
                 update.message().text(),
                 attachments = emptyList(),
-                replyTo = update.message().replyToMessage()?.messageId()?.let { MessageId(it.toString()) }
+                replyTo = replyTo
             )
 
             handlerService.handle(
@@ -52,8 +59,9 @@ class TelegramUpdateController(
         } else if (update.callbackQuery() != null) {
             val chatId = ChatId(update.callbackQuery().from().id().toString())
 
-            val sourceMessageId = MessageId(
-                update.callbackQuery().maybeInaccessibleMessage()?.messageId()?.toString()
+            val sourceMessageId = composeMessageId(
+                update.callbackQuery().from().id(),
+                update.callbackQuery().maybeInaccessibleMessage()?.messageId()
                     ?: error("Source message ID is null")
             )
 
