@@ -2,6 +2,7 @@ package com.hsfg.collector.core.user.application.serivce
 
 import com.hsfg.collector.core.interaction.domain.ChatId
 import com.hsfg.collector.core.user.application.config.ChatAuthenticationProperties
+import com.hsfg.collector.core.user.application.dto.UserProfile
 import com.hsfg.collector.core.user.application.event.ChatAuthorizedEvent
 import com.hsfg.collector.core.user.application.exception.ChatUnauthorizedException
 import com.hsfg.collector.core.user.application.port.out.ChatAuthorityRepositoryPort
@@ -63,6 +64,17 @@ class ChatAuthenticationService(
         }
 
         return true
+    }
+
+    /**
+     * @throws ChatUnauthorizedException if the token is invalid
+     */
+    fun getLocalUser(chatId: ChatId): UserProfile {
+        val authority = authorityRepositoryPort.get(chatId)
+
+        val token = authority?.token ?: throw ChatUnauthorizedException(chatId)
+
+        return parseToken(chatId, token).toProfile()
     }
 
     private fun parseToken(chatId: ChatId, token: String) = try {
