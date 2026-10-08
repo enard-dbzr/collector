@@ -5,18 +5,24 @@ import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.infrastructure.client.casdoor.custom.CasdoorUserService
 import org.casbin.casdoor.entity.User
 import org.springframework.stereotype.Service
+import org.casbin.casdoor.service.AuthService as CasdoorAuthService
 
 @Service
 class UserProfileService(
-    private val userService: CasdoorUserService,
+    private val casdoorUserService: CasdoorUserService,
+    private val casdoorAuthService: CasdoorAuthService
 ) {
 
     fun getProfile(userId: UserId): UserProfile? {
-        return userService.getUserById(userId.value)?.toProfile()
+        return casdoorUserService.getUserById(userId.value)?.toProfile()
+    }
+
+    fun parseLocalProfile(token: String): UserProfile {
+        return casdoorAuthService.parseJwtToken(token).toProfile()
     }
 }
 
-fun User.toProfile() = UserProfile(
-    id = UserId(this.id!!),
+private fun User.toProfile() = UserProfile(
+    id = UserId(this.id),
     subject = "${this.owner}/${this.name}",
 )

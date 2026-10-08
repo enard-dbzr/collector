@@ -7,6 +7,8 @@ import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
 import com.hsfg.collector.core.mediator.frame.utils.message.SendMessageFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsData
+import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
 import com.hsfg.collector.core.workflow.application.DefaultDataFactoryRegistry
 import com.hsfg.collector.core.workflow.application.frame.sequence.SequenceFrame
 import org.springframework.context.annotation.Bean
@@ -16,7 +18,8 @@ import org.springframework.context.annotation.Configuration
 class DataFactoryConfig(
     private val rootFrameFactory: RootFrame.RootFrameFactory,
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
-    private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory
+    private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
+    private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory
 ) {
     @Bean
     fun defaultDataFactoryRegistry(): DefaultDataFactoryRegistry {
@@ -39,6 +42,17 @@ class DataFactoryConfig(
             "frame.workflow.start",
             StartWorkflow::class,
             startWorkflowFactory
+        )
+
+        registry.register(
+            "frame.workflow.connections.create",
+            CreateConnectionDetailsWorkflow::class,
+            createConnectionDetailsWorkflowFactory
+        )
+        registry.register(
+            "frame.workflow.connections.create:data",
+            CreateConnectionDetailsData::class,
+            CreateConnectionDetailsData.Factory()
         )
 
         registry.register("data.utils.message_id", MessageId::class, MessageIdFactory())

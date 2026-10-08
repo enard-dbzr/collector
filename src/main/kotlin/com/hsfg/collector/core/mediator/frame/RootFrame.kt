@@ -5,6 +5,7 @@ import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
@@ -16,10 +17,12 @@ import java.util.*
 
 
 class RootFrame(
-    private var currentState: Frame<BotContext, BotEvent, *>? = null,
-    private var interceptorFrame: Frame<BotContext, BotEvent, *>? = null,
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
+    private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+
+    private var currentState: Frame<BotContext, BotEvent, *>? = null,
+    private var interceptorFrame: Frame<BotContext, BotEvent, *>? = null,
 ) : Frame<BotContext, BotEvent, Nothing?> {
 
     override fun onEnter(context: BotContext): FrameResult<Nothing?> {
@@ -41,9 +44,8 @@ class RootFrame(
         }
 
         if (event is BotEvent.ChatHandled && event.event is IncomingEvent.MessageReceived) {
-            @Suppress("ControlFlowWithEmptyBody")
             when (event.event.body.text) {
-
+                "/create_connection" -> changeState(context, createConnectionDetailsWorkflowFactory.createNew())
             }
         }
 
@@ -109,6 +111,7 @@ class RootFrame(
     class RootFrameFactory(
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
         private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
+        private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
     ) : DataFactory<RootFrame> {
 
         override fun serialize(objectPool: ObjectPool, instance: RootFrame): JsonElement {
@@ -128,12 +131,19 @@ class RootFrame(
                 objectPool.getData(PoolId(UUID.fromString(it)), Frame::class)
             } as Frame<BotContext, BotEvent, *>?
 
-            return RootFrame(currentState, interceptorFrame, authFrameFactory, startWorkflowFactory)
+            return RootFrame(
+                authFrameFactory,
+                startWorkflowFactory,
+                createConnectionDetailsWorkflowFactory,
+                currentState,
+                interceptorFrame
+            )
         }
 
         fun createNew() = RootFrame(
             authFrameFactory = authFrameFactory,
-            startWorkflowFactory = startWorkflowFactory
+            startWorkflowFactory = startWorkflowFactory,
+            createConnectionDetailsWorkflowFactory = createConnectionDetailsWorkflowFactory,
         )
     }
 }

@@ -14,7 +14,7 @@ class ChatPermissionsService(
     fun check(chatId: ChatId, permission: UserPermission): Boolean {
         val localUser = chatAuthenticationService.getLocalUser(chatId)
         val actualUser = userProfileService.getProfile(localUser.id)
-            ?: error("Authenticated user with id ${localUser.id} not found")
+            ?: error("User with id ${localUser.id} not found")
 
         return permissionsService.check(actualUser.subject, permission)
     }
