@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-5.0.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1792094400738-1" author="enard">
+        <createTable tableName="invitations">
+            <column name="code" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_invitations"/>
+            </column>
+            <column name="inviter_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invitee_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1792094400738-2" author="enard">
+        <addUniqueConstraint columnNames="invitee_id" constraintName="uc_invitations_invitee" tableName="invitations"/>
+    </changeSet>
+    <changeSet id="1792094400738-3" author="enard">
+        <addForeignKeyConstraint baseColumnNames="invitee_id" baseTableName="invitations"
+                constraintName="FK_INVITATIONS_ON_INVITEE" referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1792094400738-4" author="enard">
+        <addForeignKeyConstraint baseColumnNames="inviter_id" baseTableName="invitations"
+                constraintName="FK_INVITATIONS_ON_INVITER" referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+
+</databaseChangeLog>

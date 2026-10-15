@@ -9,5 +9,6 @@
     <include file="db/changelog/2026/10/01-01-chat_authorities-add_user_id.xml"/>
     <include file="db/changelog/2026/10/03-01-add_connection_details.xml"/>
     <include file="db/changelog/2026/10/15-01-add_users.xml"/>
+    <include file="db/changelog/2026/10/16-01-add_invitations.xml"/>
 
 </databaseChangeLog>
