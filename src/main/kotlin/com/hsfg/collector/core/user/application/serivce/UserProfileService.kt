@@ -2,19 +2,19 @@ package com.hsfg.collector.core.user.application.serivce
 
 import com.hsfg.collector.core.user.application.dto.UserProfile
 import com.hsfg.collector.core.user.domain.UserId
-import com.hsfg.collector.infrastructure.client.casdoor.custom.CasdoorUserService
 import org.casbin.casdoor.entity.User
 import org.springframework.stereotype.Service
 import org.casbin.casdoor.service.AuthService as CasdoorAuthService
+import org.casbin.casdoor.service.UserService as CasdoorUserService
 
 @Service
 class UserProfileService(
     private val casdoorUserService: CasdoorUserService,
-    private val casdoorAuthService: CasdoorAuthService
+    private val casdoorAuthService: CasdoorAuthService,
 ) {
 
     fun getProfile(userId: UserId): UserProfile? {
-        return casdoorUserService.getUserById(userId.value)?.toProfile()
+        return casdoorUserService.getUserByUserId(userId.value)?.toProfile()
     }
 
     fun parseLocalProfile(token: String): UserProfile {

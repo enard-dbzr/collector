@@ -36,7 +36,7 @@ dependencies {
 
     implementation("com.github.pengrad:java-telegram-bot-api:9.6.0")
 
-    implementation("org.casbin:casdoor-java-sdk:1.45.1")
+    implementation("org.casbin:casdoor-java-sdk:1.47.3")
 
 
     runtimeOnly("org.postgresql:postgresql")
