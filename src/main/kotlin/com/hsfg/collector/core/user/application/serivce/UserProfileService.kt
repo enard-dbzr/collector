@@ -25,4 +25,6 @@ class UserProfileService(
 private fun User.toProfile() = UserProfile(
     id = UserId(this.id),
     subject = "${this.owner}/${this.name}",
+    displayName = this.displayName,
+    email = this.email,
 )

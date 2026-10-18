@@ -6,6 +6,7 @@ import com.hsfg.collector.core.mediator.frame.RootFrame
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
 import com.hsfg.collector.core.mediator.frame.utils.message.SendMessageFrame
+import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsData
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
@@ -18,6 +19,8 @@ import org.springframework.context.annotation.Configuration
 class DataFactoryConfig(
     private val rootFrameFactory: RootFrame.RootFrameFactory,
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
+    private val findUserByIdFrameFactory: FindUserByIdFrame.Factory,
+
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory
 ) {
@@ -35,6 +38,7 @@ class DataFactoryConfig(
             SendMessageFrame.SendMessageFrameFactory()
         )
         registry.register("frame.utils.ask.text", AskTextFrame::class, AskTextFrame.Factory())
+        registry.register("frame.utils.user.find.by_id", FindUserByIdFrame::class, findUserByIdFrameFactory)
         registry.register("frame.utils.auth", AuthFrame::class, authFrameFactory)
 
 
