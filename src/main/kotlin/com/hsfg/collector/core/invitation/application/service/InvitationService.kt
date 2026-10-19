@@ -46,7 +46,7 @@ class InvitationService(
                 invitation.code,
                 false,
                 1,
-                "All",
+                casdoorProperties.applicationName,
                 invitation.code
             ).apply { state = "Active" })
 
