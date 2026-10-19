@@ -1,5 +1,6 @@
 package com.hsfg.collector.core.user.application.serivce
 
+import com.hsfg.collector.core.user.application.dto.ExtendedProfileData
 import com.hsfg.collector.core.user.application.dto.UserProfile
 import com.hsfg.collector.core.user.domain.UserId
 import org.casbin.casdoor.entity.User
@@ -15,6 +16,15 @@ class UserProfileService(
 
     fun getProfile(userId: UserId): UserProfile? {
         return casdoorUserService.getUserByUserId(userId.value)?.toProfile()
+    }
+
+    fun getExtendedProfileData(userId: UserId): ExtendedProfileData? {
+        val casdoorUser = casdoorUserService.getUserByUserId(userId.value) ?: return null
+
+        return ExtendedProfileData(
+            userId = userId,
+            registrationCode = casdoorUser.invitationCode,
+        )
     }
 
     fun parseLocalProfile(token: String): UserProfile {
