@@ -6,6 +6,7 @@ import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationWorkflow
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
@@ -20,6 +21,7 @@ class RootFrame(
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+    private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
 
     private var currentState: Frame<BotContext, BotEvent, *>? = null,
     private var interceptorFrame: Frame<BotContext, BotEvent, *>? = null,
@@ -46,6 +48,7 @@ class RootFrame(
         if (event is BotEvent.ChatHandled && event.event is IncomingEvent.MessageReceived) {
             when (event.event.body.text) {
                 "/create_connection" -> changeState(context, createConnectionDetailsWorkflowFactory.createNew())
+                "/invite" -> changeState(context, createInvitationWorkflowFactory.createNew())
             }
         }
 
@@ -112,6 +115,7 @@ class RootFrame(
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
         private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
         private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+        private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
     ) : DataFactory<RootFrame> {
 
         override fun serialize(objectPool: ObjectPool, instance: RootFrame): JsonElement {
@@ -135,6 +139,8 @@ class RootFrame(
                 authFrameFactory,
                 startWorkflowFactory,
                 createConnectionDetailsWorkflowFactory,
+                createInvitationWorkflowFactory,
+
                 currentState,
                 interceptorFrame
             )
@@ -144,6 +150,7 @@ class RootFrame(
             authFrameFactory = authFrameFactory,
             startWorkflowFactory = startWorkflowFactory,
             createConnectionDetailsWorkflowFactory = createConnectionDetailsWorkflowFactory,
+            createInvitationWorkflowFactory = createInvitationWorkflowFactory,
         )
     }
 }

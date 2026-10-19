@@ -2,6 +2,7 @@ package com.hsfg.collector.core.mediator.config
 
 import com.hsfg.collector.core.interaction.domain.MessageId
 import com.hsfg.collector.core.mediator.datafactory.MessageIdFactory
+import com.hsfg.collector.core.mediator.datafactory.UserIdFactory
 import com.hsfg.collector.core.mediator.frame.RootFrame
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
@@ -10,6 +11,9 @@ import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsData
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationData
+import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationWorkflow
+import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.core.workflow.application.DefaultDataFactoryRegistry
 import com.hsfg.collector.core.workflow.application.frame.sequence.SequenceFrame
 import org.springframework.context.annotation.Bean
@@ -22,7 +26,8 @@ class DataFactoryConfig(
     private val findUserByIdFrameFactory: FindUserByIdFrame.Factory,
 
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
-    private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory
+    private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+    private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
 ) {
     @Bean
     fun defaultDataFactoryRegistry(): DefaultDataFactoryRegistry {
@@ -59,7 +64,19 @@ class DataFactoryConfig(
             CreateConnectionDetailsData.Factory()
         )
 
+        registry.register(
+            "frame.workflow.inivitaion.create",
+            CreateInvitationWorkflow::class,
+            createInvitationWorkflowFactory
+        )
+        registry.register(
+            "frame.workflow.inivitaion.create:data",
+            CreateInvitationData::class,
+            CreateInvitationData.Factory()
+        )
+
         registry.register("data.utils.message_id", MessageId::class, MessageIdFactory())
+        registry.register("data.utils.user_id", UserId::class, UserIdFactory())
 
         return registry
     }
