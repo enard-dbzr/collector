@@ -4,13 +4,19 @@ import com.hsfg.collector.core.invitation.application.dto.CreateInvitationComman
 import com.hsfg.collector.core.invitation.application.port.out.InvitationRepository
 import com.hsfg.collector.core.invitation.domain.Invitation
 import com.hsfg.collector.core.user.domain.UserId
+import com.hsfg.collector.infrastructure.client.casdoor.config.CasdoorProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
+import java.time.LocalDateTime
+import org.casbin.casdoor.entity.Invitation as CasdoorInvitation
+import org.casbin.casdoor.service.InvitationService as CasdoorInvitationService
 
 @Service
 class InvitationService(
     private val repository: InvitationRepository,
+    private val casdoorInvitationService: CasdoorInvitationService,
+    private val casdoorProperties: CasdoorProperties,
 ) {
 
     companion object {
@@ -30,6 +36,19 @@ class InvitationService(
         )
 
         repository.create(invitation)
+
+        casdoorInvitationService.addInvitation(
+            CasdoorInvitation(
+                casdoorProperties.organizationName,
+                invitation.code,
+                LocalDateTime.now().toString(),
+                invitation.code,
+                invitation.code,
+                false,
+                1,
+                "All",
+                invitation.code
+            ).apply { state = "Active" })
 
         return invitation.code
     }

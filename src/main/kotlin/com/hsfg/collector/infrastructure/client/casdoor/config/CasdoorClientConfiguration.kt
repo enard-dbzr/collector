@@ -3,6 +3,7 @@ package com.hsfg.collector.infrastructure.client.casdoor.config
 import org.casbin.casdoor.config.Config
 import org.casbin.casdoor.service.AuthService
 import org.casbin.casdoor.service.EnforcerService
+import org.casbin.casdoor.service.InvitationService
 import org.casbin.casdoor.service.UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -26,6 +27,11 @@ class CasdoorClientConfiguration(
     @Bean
     fun getUserService(): UserService {
         return UserService(properties.toConfig())
+    }
+
+    @Bean
+    fun getInvitationService(): InvitationService {
+        return InvitationService(properties.toConfig())
     }
 }
 
