@@ -25,7 +25,7 @@ class TelegramUpdateController(
             try {
                 handleUpdate(update)
             } catch (e: Exception) {
-                logger.error(e) { "Failed to handle user update $update" }
+                logger.error(e) { "Failed to handle user update with id=${update.updateId()}" }
             }
 
         }
