@@ -7,38 +7,41 @@ import com.hsfg.collector.core.utils.exception.IdCollisionException
 import com.hsfg.collector.infrastructure.persistence.entity.InvitationEntity
 import com.hsfg.collector.infrastructure.persistence.jparepository.InvitationJpaRepository
 import com.hsfg.collector.infrastructure.persistence.jparepository.UserJpaRepository
-import jakarta.persistence.EntityManager
-import org.hibernate.exception.ConstraintViolationException
+import jakarta.transaction.Transactional
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Repository
 
 @Repository
 class DbInvitationRepository(
     private val jpaRepository: InvitationJpaRepository,
     private val userJpaRepository: UserJpaRepository,
-    private val entityManager: EntityManager,
 ) : InvitationRepository {
 
     override fun create(invitation: Invitation) {
-        val entity = invitation.toEntity(userJpaRepository)
+        val entity = invitation.toEntity(userJpaRepository).apply { new = true }
 
         try {
-            entityManager.persist(entity)
-            entityManager.flush()
-        } catch (_: ConstraintViolationException) {
-            throw IdCollisionException("code=${invitation.code}")
+            jpaRepository.saveAndFlush(entity)
+        } catch (e: DataIntegrityViolationException) {
+            if (e.isUniqueConstraintViolation()) {
+                throw IdCollisionException("code=${invitation.code}")
+            }
+            throw e
         }
+
     }
 
+    @Transactional
     override fun getByCode(code: String): Invitation? {
         return jpaRepository.findById(code)
             .orElse(null)
             ?.toDomain()
     }
 
+    @Transactional
     override fun update(invitation: Invitation) {
         jpaRepository.save(invitation.toEntity(userJpaRepository))
     }
-
 
 }
 

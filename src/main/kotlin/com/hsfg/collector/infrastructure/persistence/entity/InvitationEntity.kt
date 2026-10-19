@@ -1,6 +1,7 @@
 package com.hsfg.collector.infrastructure.persistence.entity
 
 import jakarta.persistence.*
+import org.springframework.data.domain.Persistable
 
 @Entity
 @Table(name = "invitations")
@@ -18,4 +19,12 @@ class InvitationEntity(
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invitee_id", unique = true)
     var invitee: UserEntity?,
-)
+
+    @Transient
+    var new: Boolean = false,
+) : Persistable<String> {
+
+    override fun isNew() = new
+
+    override fun getId() = code
+}
