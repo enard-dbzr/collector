@@ -23,7 +23,7 @@ class DbConnectionDetailsRepository(
 ) : ConnectionDetailsRepositoryPort {
 
     override fun create(connection: ConnectionDetails) {
-        val entity = connection.toEntity()
+        val entity = connection.toEntity().apply { new = true }
 
         try {
             jpaRepository.saveAndFlush(entity)

@@ -5,6 +5,7 @@ import com.hsfg.collector.core.connection.application.exception.ConnectionDetail
 import com.hsfg.collector.core.connection.application.port.ConnectionDetailsRepositoryPort
 import com.hsfg.collector.core.connection.domain.ConnectionDetails
 import com.hsfg.collector.core.utils.exception.IdCollisionException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.uuid.ExperimentalUuidApi
@@ -14,11 +15,18 @@ class ConnectionDetailsService(
     private val repository: ConnectionDetailsRepositoryPort,
 ) {
 
+    companion object {
+        val logger = KotlinLogging.logger { }
+    }
+
     /**
      * @throws IdCollisionException when a connection with the same id already exists for the user
      */
     fun create(connectionDto: ConnectionDetailsDto) {
-        repository.create(connectionDto.toDomain())
+        val connection = connectionDto.toDomain()
+        repository.create(connection)
+
+        logger.info { "Created connection details for user with id=${connection.userId}" }
     }
 
     /**
