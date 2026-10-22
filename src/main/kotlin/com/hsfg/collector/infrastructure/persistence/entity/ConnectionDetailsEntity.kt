@@ -1,6 +1,7 @@
 package com.hsfg.collector.infrastructure.persistence.entity
 
 import jakarta.persistence.*
+import org.springframework.data.domain.Persistable
 import java.util.*
 
 @Embeddable
@@ -18,7 +19,7 @@ data class ConnectionDetailsEntityId(
 class ConnectionDetailsEntity(
 
     @EmbeddedId
-    var id: ConnectionDetailsEntityId,
+    var entityId: ConnectionDetailsEntityId,
 
     @Column(nullable = false)
     var name: String,
@@ -28,4 +29,12 @@ class ConnectionDetailsEntity(
 
     @Column(nullable = false, columnDefinition = "text")
     var notes: String,
-)
+
+    @Transient
+    var new: Boolean = false,
+) : Persistable<ConnectionDetailsEntityId> {
+
+    override fun getId() = entityId
+
+    override fun isNew() = new
+}
