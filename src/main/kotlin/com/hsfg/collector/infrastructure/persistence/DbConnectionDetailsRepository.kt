@@ -9,8 +9,8 @@ import com.hsfg.collector.core.utils.exception.IdCollisionException
 import com.hsfg.collector.infrastructure.persistence.entity.ConnectionDetailsEntity
 import com.hsfg.collector.infrastructure.persistence.entity.ConnectionDetailsEntityId
 import com.hsfg.collector.infrastructure.persistence.jparepository.ConnectionDetailsJpaRepository
-import jakarta.persistence.EntityManager
-import org.hibernate.exception.ConstraintViolationException
+import jakarta.transaction.Transactional
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Repository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -20,20 +20,22 @@ import kotlin.uuid.toKotlinUuid
 @Repository
 class DbConnectionDetailsRepository(
     private val jpaRepository: ConnectionDetailsJpaRepository,
-    private val entityManager: EntityManager,
 ) : ConnectionDetailsRepositoryPort {
 
     override fun create(connection: ConnectionDetails) {
-        val entity = connection.toEntity()
+        val entity = connection.toEntity().apply { new = true }
 
         try {
-            entityManager.persist(entity)
-            entityManager.flush()
-        } catch (_: ConstraintViolationException) {
-            throw IdCollisionException("(detailsId=${connection.detailsId}, userId=${connection.userId})")
+            jpaRepository.saveAndFlush(entity)
+        } catch (e: DataIntegrityViolationException) {
+            if (e.isUniqueConstraintViolation()) {
+                throw IdCollisionException("(detailsId=${connection.detailsId}, userId=${connection.userId})")
+            }
+            throw e
         }
     }
 
+    @Transactional
     override fun get(userId: UserId, connectionId: Uuid): ConnectionDetails? {
         return jpaRepository.findById(
             ConnectionDetailsEntityId(
@@ -43,10 +45,12 @@ class DbConnectionDetailsRepository(
         ).orElse(null)?.toDomain()
     }
 
+    @Transactional
     override fun update(connection: ConnectionDetails) {
         jpaRepository.save(connection.toEntity())
     }
 
+    @Transactional
     override fun getUserConnections(userId: String): List<ConnectionDetails> {
         return jpaRepository.findAllByIdUserId(userId)
             .map(ConnectionDetailsEntity::toDomain)
@@ -56,7 +60,7 @@ class DbConnectionDetailsRepository(
 }
 
 private fun ConnectionDetails.toEntity() = ConnectionDetailsEntity(
-    id = ConnectionDetailsEntityId(
+    entityId = ConnectionDetailsEntityId(
         userId = userId.value,
         detailsId = detailsId.toJavaUuid(),
     ),
@@ -66,8 +70,8 @@ private fun ConnectionDetails.toEntity() = ConnectionDetailsEntity(
 )
 
 private fun ConnectionDetailsEntity.toDomain() = ConnectionDetails(
-    userId = UserId(id.userId),
-    detailsId = id.detailsId.toKotlinUuid(),
+    userId = UserId(entityId.userId),
+    detailsId = entityId.detailsId.toKotlinUuid(),
     name = name,
     details = details,
     notes = notes,

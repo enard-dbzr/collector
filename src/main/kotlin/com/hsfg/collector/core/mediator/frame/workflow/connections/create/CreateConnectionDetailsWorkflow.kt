@@ -1,10 +1,14 @@
 package com.hsfg.collector.core.mediator.frame.workflow.connections.create
 
+import com.hsfg.collector.core.connection.application.dto.ConnectionDetailsDto
+import com.hsfg.collector.core.connection.application.service.ConnectionDetailsService
 import com.hsfg.collector.core.interaction.domain.content.MessageBody
 import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
+import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
 import com.hsfg.collector.core.user.application.serivce.ChatPermissionsService
+import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.core.user.domain.UserPermission
 import com.hsfg.collector.core.workflow.application.frame.sequence.FrameKey
 import com.hsfg.collector.core.workflow.application.frame.sequence.FrameStep
@@ -21,6 +25,7 @@ import java.util.*
 
 class CreateConnectionDetailsWorkflow private constructor(
     private val chatPermissionsService: ChatPermissionsService,
+    private val connectionDetailsService: ConnectionDetailsService,
 
     private val sequence: SequenceFrame<BotContext, BotEvent>,
     private val data: CreateConnectionDetailsData
@@ -29,16 +34,29 @@ class CreateConnectionDetailsWorkflow private constructor(
     companion object {
         val log = KotlinLogging.logger { }
 
+        val ASK_USER_KEY = FrameKey<UserId?>("ask_user")
         val ASK_NAME_KEY = FrameKey<String?>("ask_name")
         val ASK_DETAILS_KEY = FrameKey<String?>("ask_details")
         val ASK_NOTES_KEY = FrameKey<String?>("ask_notes")
     }
 
-    constructor(chatPermissionsService: ChatPermissionsService) : this(
+    constructor(
+        findUserByIdFrameFactory: FindUserByIdFrame.Factory,
+
+        chatPermissionsService: ChatPermissionsService,
+        connectionDetailsService: ConnectionDetailsService,
+    ) : this(
         chatPermissionsService,
+        connectionDetailsService,
 
         SequenceFrame(
             listOf(
+                FrameStep(
+                    ASK_USER_KEY,
+                    findUserByIdFrameFactory.createNew(
+                        "Укажите id пользователя подписки"
+                    )
+                ),
                 FrameStep(
                     ASK_NAME_KEY,
                     AskTextFrame("Введите название подключения")
@@ -52,7 +70,7 @@ class CreateConnectionDetailsWorkflow private constructor(
                 FrameStep(
                     ASK_NOTES_KEY,
                     AskTextFrame(
-                        "Введите заметки к подключению (необязательно)",
+                        "Введите заметки к подключению",
                         skippable = true,
                         messageAfterSkip = "Вы пропустили ввод заметок"
                     )
@@ -73,6 +91,10 @@ class CreateConnectionDetailsWorkflow private constructor(
     override fun handle(context: BotContext, event: BotEvent): FrameResult<*> {
         val result = sequence.handle(context, event)
 
+        result.value.results(ASK_USER_KEY).mapNotNull { it.value }.forEach {
+            data.userId = it
+        }
+
         result.value.results(ASK_NAME_KEY).mapNotNull { it.value }.forEach {
             data.name = it
         }
@@ -90,7 +112,17 @@ class CreateConnectionDetailsWorkflow private constructor(
                 return FrameResult.Finished(null)
             }
 
-            log.info { "Created connection details workflow finished for chat with id ${context.chatId}: $data" }
+            connectionDetailsService.create(data.toCommand())
+
+            context.deliveryService.sendMessage(
+                context.chatId,
+                MessageBody(
+                    text = "Подключение успешно создано и привязано к пользователю.\n\n" +
+                            "Посмотреть список своих подключений можно с помощью команды /connections",
+                )
+            )
+
+            log.info { "Create connection details workflow finished for chat with id=${context.chatId}" }
         }
 
         return result
@@ -115,8 +147,12 @@ class CreateConnectionDetailsWorkflow private constructor(
 
     @Component
     class Factory(
+        private var findUserByIdFrameFactory: FindUserByIdFrame.Factory,
+
         private val chatPermissionsService: ChatPermissionsService,
+        private val connectionDetailsService: ConnectionDetailsService,
     ) : DataFactory<CreateConnectionDetailsWorkflow> {
+
         override fun serialize(objectPool: ObjectPool, instance: CreateConnectionDetailsWorkflow): JsonElement {
             return buildJsonObject {
                 put("sequence", objectPool.put(instance.sequence).value.toString())
@@ -136,6 +172,7 @@ class CreateConnectionDetailsWorkflow private constructor(
 
             return CreateConnectionDetailsWorkflow(
                 chatPermissionsService,
+                connectionDetailsService,
 
                 sequence,
                 data ?: CreateConnectionDetailsData()
@@ -143,7 +180,18 @@ class CreateConnectionDetailsWorkflow private constructor(
         }
 
         fun createNew() = CreateConnectionDetailsWorkflow(
-            chatPermissionsService
+            findUserByIdFrameFactory,
+            chatPermissionsService,
+            connectionDetailsService,
         )
     }
+}
+
+private fun CreateConnectionDetailsData.toCommand(): ConnectionDetailsDto {
+    return ConnectionDetailsDto(
+        userId = userId ?: error("user id not set"),
+        name = name,
+        details = details,
+        notes = notes,
+    )
 }
