@@ -7,6 +7,7 @@ import com.hsfg.collector.core.user.application.event.ChatAuthorizedEvent
 import com.hsfg.collector.core.user.application.exception.ChatUnauthorizedException
 import com.hsfg.collector.core.user.application.port.out.ChatAuthorityRepositoryPort
 import com.hsfg.collector.core.user.domain.ChatAuthority
+import com.hsfg.collector.core.user.domain.UserId
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import kotlin.uuid.ExperimentalUuidApi
@@ -63,5 +64,9 @@ class ChatAuthenticationService(
         val token = authority?.token ?: throw ChatUnauthorizedException(chatId)
 
         return userProfileService.parseLocalProfile(token)
+    }
+
+    fun findAuthenticatedChats(userId: UserId): List<ChatId> {
+        return authorityRepositoryPort.getByUserId(userId).map { it.chatId }
     }
 }

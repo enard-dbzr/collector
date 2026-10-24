@@ -4,6 +4,7 @@ import com.hsfg.collector.core.interaction.application.dto.incoming.IncomingEven
 import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
+import com.hsfg.collector.core.mediator.frame.utils.ProcessNotificationEventFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.readown.ReadOwnConnectionDetailsWorkflow
@@ -20,6 +21,7 @@ import java.util.*
 
 class RootFrame(
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
+    private val processNotificationEventFrameFactory: ProcessNotificationEventFrame.Factory,
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
     private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
@@ -34,6 +36,13 @@ class RootFrame(
     }
 
     override fun handle(context: BotContext, event: BotEvent): FrameResult<Nothing?> {
+        if (event is BotEvent.NotificationEvent) {
+            val processor = processNotificationEventFrameFactory.createNew()
+            processor.handle(context, event)
+
+            return FrameResult.Continue(null)
+        }
+
         if (interceptAttempt(context, event)) return FrameResult.Continue(null)
 
         if (currentState != null) {
@@ -116,6 +125,7 @@ class RootFrame(
     @Component
     class RootFrameFactory(
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
+        private val processNotificationEventFrameFactory: ProcessNotificationEventFrame.Factory,
         private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
         private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
         private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
@@ -141,6 +151,7 @@ class RootFrame(
 
             return RootFrame(
                 authFrameFactory,
+                processNotificationEventFrameFactory,
                 startWorkflowFactory,
                 createConnectionDetailsWorkflowFactory,
                 readOwnConnectionDetailsWorkflowFactory,
@@ -153,6 +164,7 @@ class RootFrame(
 
         fun createNew() = RootFrame(
             authFrameFactory = authFrameFactory,
+            processNotificationEventFrameFactory = processNotificationEventFrameFactory,
             startWorkflowFactory = startWorkflowFactory,
             createConnectionDetailsWorkflowFactory = createConnectionDetailsWorkflowFactory,
             readOwnConnectionDetailsWorkflowFactory = readOwnConnectionDetailsWorkflowFactory,
