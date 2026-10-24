@@ -37,8 +37,8 @@ class CreateInvitationWorkflow private constructor(
         const val FIND_USER_REQUEST_TEXT = "Введите id приглашающего пользователя"
         const val NOTES_MESSAGE_TEXT = "Введите заметки для приглашения"
         const val NOTES_SKIPPED_MESSAGE_TEXT = "Вы пропустили ввод заметок"
-        const val GENERATED_INVITATION_MESSAGE_TEXT = "*Приглашение создано*\n\n" +
-                "Код приглашения: `%s`\n\n" +
+        const val GENERATED_INVITATION_MESSAGE_TEXT = "<b>Приглашение создано</b>\n\n" +
+                "Код приглашения: <code>%s</code>\n\n" +
                 "Пригласите пользователя, передав ему этот код. Он понадобится при регистрации."
 
         val FIND_USER_KEY = FrameKey<UserId?>("find_user")
