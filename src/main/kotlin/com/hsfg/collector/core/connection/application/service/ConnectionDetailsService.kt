@@ -1,12 +1,14 @@
 package com.hsfg.collector.core.connection.application.service
 
 import com.hsfg.collector.core.connection.application.dto.ConnectionDetailsDto
+import com.hsfg.collector.core.connection.application.event.ConnectionsUpdatedEvent
 import com.hsfg.collector.core.connection.application.exception.ConnectionDetailsNotFound
 import com.hsfg.collector.core.connection.application.port.ConnectionDetailsRepositoryPort
 import com.hsfg.collector.core.connection.domain.ConnectionDetails
 import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.core.utils.exception.IdCollisionException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.uuid.ExperimentalUuidApi
@@ -14,6 +16,7 @@ import kotlin.uuid.ExperimentalUuidApi
 @Service
 class ConnectionDetailsService(
     private val repository: ConnectionDetailsRepositoryPort,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
 
     companion object {
@@ -28,6 +31,7 @@ class ConnectionDetailsService(
         repository.create(connection)
 
         logger.info { "Created connection details for user with id=${connection.userId}" }
+        eventPublisher.publishEvent(ConnectionsUpdatedEvent(connection.userId))
     }
 
     fun getUserConnections(userId: UserId): List<ConnectionDetailsDto> {
@@ -46,6 +50,8 @@ class ConnectionDetailsService(
         connection.fillUpdates(connectionDto)
 
         repository.update(connection)
+
+        eventPublisher.publishEvent(ConnectionsUpdatedEvent(connection.userId))
     }
 }
 

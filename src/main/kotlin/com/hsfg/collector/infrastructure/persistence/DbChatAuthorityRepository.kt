@@ -3,6 +3,7 @@ package com.hsfg.collector.infrastructure.persistence
 import com.hsfg.collector.core.interaction.domain.ChatId
 import com.hsfg.collector.core.user.application.port.out.ChatAuthorityRepositoryPort
 import com.hsfg.collector.core.user.domain.ChatAuthority
+import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.infrastructure.persistence.entity.ChatAuthorityEntity
 import com.hsfg.collector.infrastructure.persistence.jparepository.ChatAuthorityJpaRepository
 import org.springframework.stereotype.Repository
@@ -22,5 +23,9 @@ class DbChatAuthorityRepository(
 
     override fun getByAuthState(authState: String): ChatAuthority? {
         return jpaRepository.getByState(authState)?.toDomain()
+    }
+
+    override fun getByUserId(userId: UserId): List<ChatAuthority> {
+        return jpaRepository.getByUserId(userId.value).map { it.toDomain() }
     }
 }

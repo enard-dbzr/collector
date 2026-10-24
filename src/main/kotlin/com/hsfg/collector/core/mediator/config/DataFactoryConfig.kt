@@ -5,6 +5,7 @@ import com.hsfg.collector.core.mediator.datafactory.MessageIdFactory
 import com.hsfg.collector.core.mediator.datafactory.UserIdFactory
 import com.hsfg.collector.core.mediator.frame.RootFrame
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
+import com.hsfg.collector.core.mediator.frame.utils.ProcessNotificationEventFrame
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
 import com.hsfg.collector.core.mediator.frame.utils.message.SendMessageFrame
 import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
@@ -25,6 +26,7 @@ class DataFactoryConfig(
     private val rootFrameFactory: RootFrame.RootFrameFactory,
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
     private val findUserByIdFrameFactory: FindUserByIdFrame.Factory,
+    private val processNotificationEventFrameFactory: ProcessNotificationEventFrame.Factory,
 
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
@@ -47,6 +49,11 @@ class DataFactoryConfig(
         registry.register("frame.utils.ask.text", AskTextFrame::class, AskTextFrame.Factory())
         registry.register("frame.utils.user.find.by_id", FindUserByIdFrame::class, findUserByIdFrameFactory)
         registry.register("frame.utils.auth", AuthFrame::class, authFrameFactory)
+        registry.register(
+            "frame.utils.processor.event",
+            ProcessNotificationEventFrame::class,
+            processNotificationEventFrameFactory
+        )
 
 
         registry.register(
