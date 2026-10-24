@@ -11,6 +11,7 @@ import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsData
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.connections.readown.ReadOwnConnectionDetailsWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationData
 import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationWorkflow
 import com.hsfg.collector.core.user.domain.UserId
@@ -27,6 +28,7 @@ class DataFactoryConfig(
 
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+    private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
     private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
 ) {
     @Bean
@@ -62,6 +64,11 @@ class DataFactoryConfig(
             "frame.workflow.connections.create:data",
             CreateConnectionDetailsData::class,
             CreateConnectionDetailsData.Factory()
+        )
+        registry.register(
+            "frame.workflow.connections.read_own",
+            ReadOwnConnectionDetailsWorkflow::class,
+            readOwnConnectionDetailsWorkflowFactory
         )
 
         registry.register(

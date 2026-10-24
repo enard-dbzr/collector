@@ -29,7 +29,7 @@ class TelegramInteractionSender(
 
     override fun sendMessage(chatId: ChatId, body: MessageBody): MessageId {
         val request = SendMessage(chatId.value.toLong(), body.text)
-            .parseMode(ParseMode.Markdown)
+            .parseMode(ParseMode.HTML)
 
         if (body.replyTo != null)
             request.replyParameters(ReplyParameters(body.replyTo.value.toInt()))
@@ -51,7 +51,8 @@ class TelegramInteractionSender(
         body: EditMessageBody
     ) {
         val request = if (body.text != null) {
-            val r = EditMessageText(messageId.chatId(), messageId.messageId(), body.text).parseMode(ParseMode.Markdown)
+            val r = EditMessageText(messageId.chatId(), messageId.messageId(), body.text)
+                .parseMode(ParseMode.HTML)
             body.attachments?.let { a -> r.replyMarkup(buildInlineKeyboard(a)) }
             r
         } else {

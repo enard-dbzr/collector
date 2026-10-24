@@ -4,6 +4,7 @@ import com.hsfg.collector.core.connection.application.dto.ConnectionDetailsDto
 import com.hsfg.collector.core.connection.application.exception.ConnectionDetailsNotFound
 import com.hsfg.collector.core.connection.application.port.ConnectionDetailsRepositoryPort
 import com.hsfg.collector.core.connection.domain.ConnectionDetails
+import com.hsfg.collector.core.user.domain.UserId
 import com.hsfg.collector.core.utils.exception.IdCollisionException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -29,6 +30,10 @@ class ConnectionDetailsService(
         logger.info { "Created connection details for user with id=${connection.userId}" }
     }
 
+    fun getUserConnections(userId: UserId): List<ConnectionDetailsDto> {
+        return repository.getUserConnections(userId.value).map { it.toDto() }
+    }
+
     /**
      * @throws ConnectionDetailsNotFound when a connection with the given id does not exist for the user
      */
@@ -51,6 +56,15 @@ private fun ConnectionDetailsDto.toDomain() = ConnectionDetails(
     name = this.name,
     details = this.details,
     notes = this.notes
+)
+
+@OptIn(ExperimentalUuidApi::class)
+private fun ConnectionDetails.toDto() = ConnectionDetailsDto(
+    userId = this.userId,
+    detailsId = this.detailsId,
+    name = this.name,
+    details = this.details,
+    notes = this.notes,
 )
 
 private fun ConnectionDetails.fillUpdates(connectionDto: ConnectionDetailsDto) {

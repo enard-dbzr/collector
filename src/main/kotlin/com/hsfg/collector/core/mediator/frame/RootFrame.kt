@@ -6,6 +6,7 @@ import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.connections.readown.ReadOwnConnectionDetailsWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationWorkflow
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
@@ -21,6 +22,7 @@ class RootFrame(
     private val authFrameFactory: AuthFrame.AuthFrameFactory,
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+    private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
     private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
 
     private var currentState: Frame<BotContext, BotEvent, *>? = null,
@@ -48,6 +50,7 @@ class RootFrame(
         if (event is BotEvent.ChatHandled && event.event is IncomingEvent.MessageReceived) {
             when (event.event.body.text) {
                 "/create_connection" -> changeState(context, createConnectionDetailsWorkflowFactory.createNew())
+                "/connections" -> changeState(context, readOwnConnectionDetailsWorkflowFactory.createNew())
                 "/invite" -> changeState(context, createInvitationWorkflowFactory.createNew())
             }
         }
@@ -115,6 +118,7 @@ class RootFrame(
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
         private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
         private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
+        private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
         private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
     ) : DataFactory<RootFrame> {
 
@@ -139,6 +143,7 @@ class RootFrame(
                 authFrameFactory,
                 startWorkflowFactory,
                 createConnectionDetailsWorkflowFactory,
+                readOwnConnectionDetailsWorkflowFactory,
                 createInvitationWorkflowFactory,
 
                 currentState,
@@ -150,6 +155,7 @@ class RootFrame(
             authFrameFactory = authFrameFactory,
             startWorkflowFactory = startWorkflowFactory,
             createConnectionDetailsWorkflowFactory = createConnectionDetailsWorkflowFactory,
+            readOwnConnectionDetailsWorkflowFactory = readOwnConnectionDetailsWorkflowFactory,
             createInvitationWorkflowFactory = createInvitationWorkflowFactory,
         )
     }
