@@ -1,6 +1,7 @@
 package com.hsfg.collector.core.invitation.application.service
 
 import com.hsfg.collector.core.invitation.application.dto.CreateInvitationCommand
+import com.hsfg.collector.core.invitation.application.dto.InvitationRecord
 import com.hsfg.collector.core.invitation.application.port.out.InvitationRepository
 import com.hsfg.collector.core.invitation.domain.Invitation
 import com.hsfg.collector.core.user.domain.UserId
@@ -66,6 +67,16 @@ class InvitationService(
         repository.update(invitation)
 
         log.info { "Invitee with id=$inviteeId registered" }
+    }
+
+    fun findInviter(invitee: UserId): InvitationRecord? {
+        val invitation = repository.getByInvitee(invitee) ?: return null
+
+        return InvitationRecord(
+            invitation.inviter,
+            invitation.invitee!!,
+            invitation.notes
+        )
     }
 
     private fun generateCode(): String =
