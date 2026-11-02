@@ -1,6 +1,8 @@
 package com.hsfg.collector.core.mediator.textbuilder
 
+import com.hsfg.collector.core.interaction.application.service.ChatInfoService
 import com.hsfg.collector.core.invitation.application.service.InvitationService
+import com.hsfg.collector.core.user.application.serivce.ChatAuthenticationService
 import com.hsfg.collector.core.user.application.serivce.UserProfileService
 import com.hsfg.collector.core.user.domain.UserId
 import org.springframework.stereotype.Component
@@ -9,11 +11,16 @@ import org.springframework.stereotype.Component
 class UserProfileTextBuilder(
     private val userProfileService: UserProfileService,
     private val invitationService: InvitationService,
+    private val chatAuthenticationService: ChatAuthenticationService,
+    private val chatInfoService: ChatInfoService,
 ) {
 
     fun buildProfile(userId: UserId, header: String): String {
         val profile = userProfileService.getProfile(userId) ?: error("profile not found")
         val invitationRecord = invitationService.findInviter(userId)
+
+        val chat = chatAuthenticationService.findAuthenticatedChats(userId).firstOrNull()
+        val chatInfo = chat?.let { chatInfoService.getChatInfo(it) }
 
         return buildString {
             appendLine(header)
@@ -21,6 +28,10 @@ class UserProfileTextBuilder(
             appendLine("Имя: ${profile.displayName}")
             appendLine("Email: ${profile.email}")
             appendLine("ID: <code>${profile.id.value}</code>")
+
+            if (chatInfo?.username != null) {
+                appendLine("Чат: @${chatInfo.username}")
+            }
 
             if (invitationRecord != null) {
                 appendLine()
