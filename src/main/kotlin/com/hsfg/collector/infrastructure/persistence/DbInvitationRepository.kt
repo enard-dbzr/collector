@@ -38,6 +38,12 @@ class DbInvitationRepository(
             ?.toDomain()
     }
 
+    override fun getByInvitee(invitee: UserId): Invitation? {
+        return jpaRepository.getByInvitee(
+            userJpaRepository.getReferenceById(invitee.value)
+        )?.toDomain()
+    }
+
     @Transactional
     override fun update(invitation: Invitation) {
         jpaRepository.save(invitation.toEntity(userJpaRepository))

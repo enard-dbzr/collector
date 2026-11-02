@@ -3,7 +3,7 @@ package com.hsfg.collector.core.mediator.frame.utils
 import com.hsfg.collector.core.interaction.domain.content.MessageBody
 import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
-import com.hsfg.collector.core.mediator.mapper.NotificationTextMapper
+import com.hsfg.collector.core.mediator.textbuilder.NotificationTextBuilder
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
@@ -13,7 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import org.springframework.stereotype.Component
 
 class ProcessNotificationEventFrame(
-    private val notificationTextMapper: NotificationTextMapper,
+    private val notificationTextBuilder: NotificationTextBuilder,
 ) : Frame<BotContext, BotEvent, Nothing?> {
 
     override fun onEnter(context: BotContext): FrameResult<Nothing?> {
@@ -26,7 +26,7 @@ class ProcessNotificationEventFrame(
 
         context.deliveryService.sendMessage(
             context.chatId,
-            MessageBody(text = notificationTextMapper.buildText(event.notification))
+            MessageBody(text = notificationTextBuilder.buildText(event.notification))
         )
 
         return FrameResult.Finished(null)
@@ -34,7 +34,7 @@ class ProcessNotificationEventFrame(
 
     @Component
     class Factory(
-        private val notificationTextMapper: NotificationTextMapper,
+        private val notificationTextBuilder: NotificationTextBuilder,
     ) : DataFactory<ProcessNotificationEventFrame> {
 
         override fun serialize(objectPool: ObjectPool, instance: ProcessNotificationEventFrame): JsonElement {
@@ -45,6 +45,6 @@ class ProcessNotificationEventFrame(
             return createNew()
         }
 
-        fun createNew() = ProcessNotificationEventFrame(notificationTextMapper)
+        fun createNew() = ProcessNotificationEventFrame(notificationTextBuilder)
     }
 }
