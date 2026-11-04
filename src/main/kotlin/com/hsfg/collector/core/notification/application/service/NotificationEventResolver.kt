@@ -4,6 +4,7 @@ import com.hsfg.collector.core.connection.application.event.ConnectionsUpdatedEv
 import com.hsfg.collector.core.mediator.eventproducer.ChatNotificationEventProducer
 import com.hsfg.collector.core.notification.domain.ToNotifyEventType
 import com.hsfg.collector.core.user.application.event.UserRegisteredEvent
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Service
@@ -14,17 +15,29 @@ class NotificationEventResolver(
     private val notificationProducer: ChatNotificationEventProducer,
 ) {
 
+    companion object {
+        val logger = KotlinLogging.logger {}
+    }
+
     @EventListener
     fun onConnectionsUpdated(event: ConnectionsUpdatedEvent) {
-        notificationProducer.sendConnectionsUpdated(event.userId)
+        try {
+            notificationProducer.sendConnectionsUpdated(event.userId)
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to send connections updated notification for user ${event.userId}" }
+        }
     }
 
     @Order(100)
     @EventListener
     fun onUserRegistered(event: UserRegisteredEvent) {
-        notificationProducer.sendUserRegistered(
-            notificationAssignmentsService.getUsersToNotify(ToNotifyEventType.USER_REGISTERED),
-            event.user.id
-        )
+        try {
+            notificationProducer.sendUserRegistered(
+                notificationAssignmentsService.getUsersToNotify(ToNotifyEventType.USER_REGISTERED),
+                event.user.id
+            )
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to send user registered notification for user ${event.user.id}" }
+        }
     }
 }
