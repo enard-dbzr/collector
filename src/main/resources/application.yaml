@@ -39,3 +39,6 @@ app:
 
   chat-authentication:
     callback: ${APP_CHAT_AUTHENTICATION_CALLBACK}
+
+  text:
+    help-chat-link: "@vpn_0x45F6"

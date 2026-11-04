@@ -9,6 +9,7 @@ import com.hsfg.collector.core.mediator.frame.utils.ProcessNotificationEventFram
 import com.hsfg.collector.core.mediator.frame.utils.ask.AskTextFrame
 import com.hsfg.collector.core.mediator.frame.utils.message.SendMessageFrame
 import com.hsfg.collector.core.mediator.frame.utils.user.find.FindUserByIdFrame
+import com.hsfg.collector.core.mediator.frame.workflow.HelpWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsData
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
@@ -29,6 +30,7 @@ class DataFactoryConfig(
     private val processNotificationEventFrameFactory: ProcessNotificationEventFrame.Factory,
 
     private val startWorkflowFactory: StartWorkflow.StartWorkflowFactory,
+    private val helpWorkflowFactory: HelpWorkflow.Factory,
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
     private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
     private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
@@ -60,6 +62,12 @@ class DataFactoryConfig(
             "frame.workflow.start",
             StartWorkflow::class,
             startWorkflowFactory
+        )
+
+        registry.register(
+            "frame.workflow.help",
+            HelpWorkflow::class,
+            helpWorkflowFactory
         )
 
         registry.register(

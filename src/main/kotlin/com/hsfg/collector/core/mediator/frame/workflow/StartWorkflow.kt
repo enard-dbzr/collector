@@ -4,6 +4,7 @@ import com.hsfg.collector.core.mediator.BotContext
 import com.hsfg.collector.core.mediator.BotEvent
 import com.hsfg.collector.core.mediator.frame.utils.AuthFrame
 import com.hsfg.collector.core.mediator.frame.utils.message.SendMessageFrame
+import com.hsfg.collector.core.mediator.textbuilder.StartTextBuilder
 import com.hsfg.collector.core.workflow.application.frame.sequence.FrameKey
 import com.hsfg.collector.core.workflow.application.frame.sequence.FrameStep
 import com.hsfg.collector.core.workflow.application.frame.sequence.SequenceFrame
@@ -20,11 +21,14 @@ class StartWorkflow private constructor(
     private val sequence: SequenceFrame<BotContext, BotEvent>,
 ) : Frame<BotContext, BotEvent, Any?> {
 
-    constructor(authFrameFactory: AuthFrame.AuthFrameFactory) : this(
+    constructor(
+        startTextBuilder: StartTextBuilder,
+        authFrameFactory: AuthFrame.AuthFrameFactory
+    ) : this(
         SequenceFrame(
             listOf(
                 FrameStep(FrameKey(), authFrameFactory.createNew()),
-                FrameStep(FrameKey(), SendMessageFrame("Hello"))
+                FrameStep(FrameKey(), SendMessageFrame(startTextBuilder.buildText()))
             )
         ),
     )
@@ -43,6 +47,8 @@ class StartWorkflow private constructor(
 
     @Component
     class StartWorkflowFactory(
+        private val startTextBuilder: StartTextBuilder,
+
         private val authFrameFactory: AuthFrame.AuthFrameFactory,
     ) : DataFactory<StartWorkflow> {
         override fun serialize(objectPool: ObjectPool, instance: StartWorkflow): JsonElement {
@@ -57,9 +63,14 @@ class StartWorkflow private constructor(
             val sequence = objectPool.getData(PoolId(sequenceId), SequenceFrame::class)
                     as SequenceFrame<BotContext, BotEvent>
 
-            return StartWorkflow(sequence)
+            return StartWorkflow(
+                sequence,
+            )
         }
 
-        fun createNew() = StartWorkflow(authFrameFactory)
+        fun createNew() = StartWorkflow(
+            startTextBuilder,
+            authFrameFactory,
+        )
     }
 }
