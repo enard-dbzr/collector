@@ -10,6 +10,7 @@ import com.hsfg.collector.core.mediator.frame.workflow.StartWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.create.CreateConnectionDetailsWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.connections.readown.ReadOwnConnectionDetailsWorkflow
 import com.hsfg.collector.core.mediator.frame.workflow.invitation.create.CreateInvitationWorkflow
+import com.hsfg.collector.core.mediator.frame.workflow.profile.read.ReadProfileWorkflow
 import com.hsfg.collector.core.workflow.domain.frame.Frame
 import com.hsfg.collector.core.workflow.domain.frame.FrameResult
 import com.hsfg.collector.core.workflow.domain.objectpool.DataFactory
@@ -28,6 +29,7 @@ class RootFrame(
     private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
     private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
     private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
+    private val readProfileWorkflowFactory: ReadProfileWorkflow.Factory,
 
     private var currentState: Frame<BotContext, BotEvent, *>? = null,
     private var interceptorFrame: Frame<BotContext, BotEvent, *>? = null,
@@ -58,12 +60,17 @@ class RootFrame(
             return FrameResult.Continue(null)
         }
 
-        if (event is BotEvent.ChatHandled && event.event is IncomingEvent.MessageReceived) {
-            when (event.event.body.text) {
+        if (event is BotEvent.ChatHandled
+            && event.event is IncomingEvent.MessageReceived
+            && event.event.body.text.startsWith("/")
+        ) {
+            val command = event.event.body.text.split(" ")
+            when (command.firstOrNull()) {
                 "/help" -> changeState(context, helpWorkflowFactory.createNew())
                 "/create_connection" -> changeState(context, createConnectionDetailsWorkflowFactory.createNew())
                 "/connections" -> changeState(context, readOwnConnectionDetailsWorkflowFactory.createNew())
                 "/invite" -> changeState(context, createInvitationWorkflowFactory.createNew())
+                "/profile" -> changeState(context, readProfileWorkflowFactory.createNew(command.getOrNull(1)))
             }
         }
 
@@ -134,6 +141,7 @@ class RootFrame(
         private val createConnectionDetailsWorkflowFactory: CreateConnectionDetailsWorkflow.Factory,
         private val readOwnConnectionDetailsWorkflowFactory: ReadOwnConnectionDetailsWorkflow.Factory,
         private val createInvitationWorkflowFactory: CreateInvitationWorkflow.Factory,
+        private val readProfileWorkflowFactory: ReadProfileWorkflow.Factory,
     ) : DataFactory<RootFrame> {
 
         override fun serialize(objectPool: ObjectPool, instance: RootFrame): JsonElement {
@@ -161,6 +169,7 @@ class RootFrame(
                 createConnectionDetailsWorkflowFactory,
                 readOwnConnectionDetailsWorkflowFactory,
                 createInvitationWorkflowFactory,
+                readProfileWorkflowFactory,
 
                 currentState,
                 interceptorFrame
@@ -175,6 +184,7 @@ class RootFrame(
             createConnectionDetailsWorkflowFactory = createConnectionDetailsWorkflowFactory,
             readOwnConnectionDetailsWorkflowFactory = readOwnConnectionDetailsWorkflowFactory,
             createInvitationWorkflowFactory = createInvitationWorkflowFactory,
+            readProfileWorkflowFactory = readProfileWorkflowFactory,
         )
     }
 }

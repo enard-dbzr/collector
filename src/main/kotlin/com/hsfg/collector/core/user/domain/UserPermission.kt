@@ -5,4 +5,6 @@ enum class UserPermission(val resource: String, val action: String) {
     READ_OWN_CONNECTIONS("connections:own", "Read"),
 
     WRITE_INVITATIONS("invitations", "Write"),
+
+    READ_PROFILE("profile", "Read"),
 }
